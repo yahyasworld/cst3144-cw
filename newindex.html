@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <title>Summer Activities</title>
+  </head>
+  <body>
+    <div id="app">
+      <nav class="navbar">
+        <div class="nav-content">
+          <h1 class="site-name" v-text="sitename"></h1>
+
+          <div class="search-bar">
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Search products..."
+            />
+            <button v-on:click="filterProducts">
+              <i class="fa-solid fa-search"></i>
+            </button>
+          </div>
+
+          <button
+            class="checkout-button"
+            v-if="cartitemcount > 0"
+            v-on:click="toggleCheckout"
+          >
+            <i class="fa-solid fa-cart-shopping"></i>
+            {{ checkoutPage ? 'Hide Checkout' : 'Checkout (' + cartitemcount +
+            ')' }}
+          </button>
+        </div>
+      </nav>
+      <br />
+
+      <div class="filter-section" v-if="!checkoutPage">
+        <label for="sort-by">Sort By:</label>
+        <select v-model="sortCategory">
+          <option value="name">Name</option>
+          <option value="price">Price</option>
+          <option value="location">Location</option>
+          <option value="availability">Availability</option>
+        </select>
+        <select v-model="sortOrder">
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
+
+      <main v-if="!checkoutPage">
+        <div class="products-grid">
+          <div
+            v-for="product in sortedProducts"
+            :key="product.id"
+            class="product-item"
+          >
+            <h2 v-text="product.title"></h2>
+            <figure>
+              <img class="image-1" v-bind:src="product.image" />
+            </figure>
+            <h2 v-text="product.subject"></h2>
+            <p v-text="'Location: ' + product.location"></p>
+            <p>Price: {{ product.price }} AED</p>
+            <p>Available Items: {{ product.AvailableInventory }}</p>
+            <button
+              class="addToCart"
+              v-on:click="addToCart(product)"
+              v-if="canAddToCart(product)"
+            >
+              Add to cart
+            </button>
+            <button disabled v-else>Add to cart</button>
+            <span v-if="product.AvailableInventory <= 0">All out!</span>
+            <span v-else-if="product.AvailableInventory < 5">
+              Only {{ product.AvailableInventory }} left!
+            </span>
+            
+          </div>
+        </div>
+      </main>
+
+      <div v-if="checkoutPage" class="checkout-div">
+        <div class="checkout-container">
+          <div class="input-fields">
+            <h3>Customer Information</h3>
+            <p>
+              <strong>First Name:</strong>
+              <input v-model.trim="order.firstName" />
+            </p>
+            <p>
+              <strong>Last Name:</strong>
+              <input v-model.trim="order.lastName" />
+            </p>
+            <p>
+              <strong>Address:</strong>
+              <input v-model="order.address" />
+            </p>
+            <p>
+              <strong>City:</strong>
+              <input v-model="order.city" />
+            </p>
+            <p>
+              <strong>State:</strong>
+              <select v-model="order.state">
+                <option disabled value="">States</option>
+                <option v-for="(state, key) in states" :value="state">
+                  {{ key }}
+                </option>
+              </select>
+            </p>
+            <p>
+              <strong>Zip/Postal Code:</strong>
+              <input v-model.number="order.zip" type="number" />
+            </p>
+            <p>
+              <strong>Phone:</strong>
+              <input v-model.number="order.phone" type="number" />
+            </p>
+            <p>
+              <input
+                type="checkbox"
+                id="gift"
+                value="true"
+                v-model="order.gift"
+              />
+              <label for="gift">Ship as Gift?</label>
+            </p>
+            <p>
+              <input
+                type="radio"
+                id="home"
+                value="Home"
+                v-model="order.method"
+              />
+              <label for="home">Home</label>
+              <input
+                type="radio"
+                id="business"
+                value="Business"
+                v-model="order.method"
+              />
+              <label for="business">Business</label>
+            </p>
+          </div>
+
+          <div class="order-summary">
+            <h3>Order Details</h3>
+            <p><strong>First Name:</strong> {{ order.firstName }}</p>
+            <p><strong>Last Name:</strong> {{ order.lastName }}</p>
+            <p><strong>Address:</strong> {{ order.address }}</p>
+            <p><strong>City:</strong> {{ order.city }}</p>
+            <p><strong>State:</strong> {{ order.state }}</p>
+            <p><strong>Zip/Postal Code:</strong> {{ order.zip }}</p>
+            <p><strong>Phone:</strong> {{ order.phone }}</p>
+            <p><strong>Gift:</strong> {{ order.gift ? 'Yes' : 'No' }}</p>
+            <p><strong>Method:</strong> {{ order.method }}</p>
+          </div>
+
+          <div class="cart-summary">
+            <h3>Cart Summary</h3>
+            <div v-for="(item, index) in cart" :key="item.id" class="item">
+              <span>{{ item.subject }} - Price: {{ item.price }} AED</span>
+              <button class="delete-button" @click="removeFromCart(index)">
+                Delete
+              </button>
+            </div>
+            <hr />
+            <p>
+              <strong>Total Price:</strong>
+              <strong>{{ totalPrice }} AED</strong>
+            </p>
+            <button
+              class="placeOrder"
+              v-if="isOrderComplete && checkoutPage"
+              v-on:click="submitOrder"
+            >
+              Place Order
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="showPopup" class="popup">{{ popupMessage }}</div>
+    </div>
+
+    <script>
+      var SummerActivities = new Vue({
+        el: "#app",
+        data: {
+          sitename: "Summer Activities",
+          searchQuery: "",
+          sortCategory: "price",
+          sortOrder: "asc",
+          products: [
+            {
+              id: 101,
+              title: "Dance Club",
+              subject: "Dance",
+              location: "Dubai",
+              price: 100,
+              image: 'images5.jpeg',
+              AvailableInventory: 10,
+            
+            },
+            {
+              id: 102,
+              title: "Chess Club",
+              subject: "Chess",
+              location: "Abu Dhabi",
+              price: 155,
+              image: 'horse-chess-logo-4d3a344a-31cd-4b66-b938-a06db92f70b3.jpg',
+              AvailableInventory: 23,
+             
+            },
+            {
+              id: 103,
+              title: 'Physical Education',
+              subject: "Mental Health",
+              location: "Sharjah",
+              price: 130,
+              image: '1489a60306a98752f4e0464d24a9e78f.jpg',
+              AvailableInventory: 25,
+              
+            },
+            {
+              id: 104,
+              title: "Drama & Film Club",
+              subject: "Drama",
+              location: "Al Ain",
+              price: 80,
+              image: 'drama-masks.jpeg',
+              AvailableInventory: 15,
+             
+            },
+            {
+              id: 105,
+              title: "Music Club",
+              subject: "Music",
+              location: "Jebel Ali",
+              price: 100,
+              image: 'png-clipart-roy-music-school-music-industry-ghaziabad-alas-colores-logo-monochrome.png',
+              AvailableInventory: 25,
+             
+            },
+            {
+              id: 106,
+              title: "Science Club",
+              subject: "Science & Technology",
+              location: "Dubai",
+              price: 195,
+              image: '82e7287b91acb66d6f024e07c98845b1.jpg',
+              AvailableInventory: 25,
+              
+            },
+            {
+              id: 107,
+              title: "Rugby Club",
+              subject: "Sports",
+              location: "Al Jaddaf",
+              price: 130,
+              image: "rugby-logo-with-title-rugby-rugby-ball_472355-392.avif",
+              AvailableInventory: 18,
+        
+            },
+            {
+              id: 108,
+              title: "Art Club",
+              subject: "Art",
+              location: "Sharjah",
+              price: 170,
+              image: 'creators-gonna-create-600nw-1153610236.webp',
+              AvailableInventory: 10,
+             
+            },
+            {
+              id: 109,
+              title: "Badminton Club",
+              subject: "Sports",
+              location: "Dubai",
+              price: 150,
+              image: '360_F_512245982_W6yxaY8ipq1yACVf02guW7RqLTFf6vAJ.jpg',
+              AvailableInventory: 8,
+              
+            },
+            {
+              id: 110,
+              title: "Padel Club",
+              subject: "Sports",
+              location: "Abu Dhabi",
+              price: 120,
+              image: 'padel-club-rackets-tennis-ball-logo-badge-emblem-illustration-316045988.webp',
+              AvailableInventory: 5,
+              
+            },
+          ],
+          cart: [],
+          order: {
+            firstName: "",
+            lastName: "",
+            address: "",
+            city: "",
+            state: "",
+            zip: null,
+            phone: null,
+            gift: false,
+            method: "",
+          },
+          states: {
+            Dubai: "Dubai",
+            "Abu Dhabi": "Abu Dhabi",
+            Ajman: "Ajman",
+            Sharjah: "Sharjah",
+            "Ras Al Khaimah": "Ras Al Khaimah",
+            "Umm Al Quwain": "Umm Al Quwain",
+            Fujairah: "Fujairah"
+          },
+          totalPrice: 0,
+          cartitemcount: 0,
+          checkoutPage: false,
+          showPopup: false,
+          popupMessage: "",
+        },
+
+        computed: {
+          filteredProducts() {
+            return this.products.filter((product) => {
+              const searchQuery = this.searchQuery.toLowerCase();
+              return (
+                product.subject.toLowerCase().includes(searchQuery) ||
+                product.title.toLowerCase().includes(searchQuery) ||
+                product.location.toLowerCase().includes(searchQuery)
+              );
+            });
+          },
+          sortedProducts() {
+            let products = this.filteredProducts.slice();
+            if (this.sortCategory === "price") {
+              products.sort((a, b) =>
+                this.sortOrder === "asc" ? a.price - b.price : b.price - a.price
+              );
+            } else if (this.sortCategory === "availability") {
+              products.sort((a, b) =>
+                this.sortOrder === "asc"
+                  ? a.AvailableInventory - b.AvailableInventory
+                  : b.AvailableInventory - a.AvailableInventory
+              );
+            } else if (this.sortCategory === "location") {
+              products.sort((a, b) =>
+                this.sortOrder === "asc"
+                  ? a.location.localeCompare(b.location)
+                  : b.location.localeCompare(a.location)
+              );
+            } else if (this.sortCategory === "name") {
+              products.sort((a, b) =>
+                this.sortOrder === "asc"
+                  ? a.subject.localeCompare(b.subject)
+                  : b.subject.localeCompare(a.subject)
+              );
+            }
+            return products;
+          },
+          isOrderComplete() {
+            return (
+              this.order.firstName &&
+              this.order.lastName &&
+              this.order.address &&
+              this.order.city &&
+              this.order.state &&
+              this.order.zip &&
+              this.order.phone &&
+              this.order.method
+            );
+          },
+        },
+
+        methods: {
+          async fetchActivities() {
+            try {
+              const response = await fetch(
+                "http://localhost:3000/collection/lessons"
+              );
+              const data = await response.json();
+              this.activities = data.activities || [];
+            } catch (error) {
+              console.error("Error fetching activities:", error);
+            }
+          },
+
+          filterProducts() {
+            console.log("Search triggered for query:", this.searchQuery);
+          },
+
+          canAddToCart(product) {
+            return product.AvailableInventory > 0;
+          },
+          addToCart(product) {
+            if (this.canAddToCart(product)) {
+              this.cart.push(product);
+              product.AvailableInventory--;
+              this.cartitemcount = this.cart.length;
+              this.calculateTotalPrice();
+            }
+          },
+          removeFromCart(index) {
+            const product = this.cart[index];
+            product.AvailableInventory++;
+            this.cart.splice(index, 1);
+            this.cartitemcount = this.cart.length;
+            this.calculateTotalPrice();
+          },
+          calculateTotalPrice() {
+            this.totalPrice = this.cart.reduce(
+              (sum, item) => sum + item.price,
+              0
+            );
+          },
+          toggleCheckout() {
+            this.checkoutPage = !this.checkoutPage;
+          },
+          async submitOrder() {
+            try {
+              const response = await fetch(
+                "http://localhost:3000/place-order",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    firstName: this.order.firstName,
+                    lastName: this.order.lastName,
+                    address: this.order.address,
+                    city: this.order.city,
+                    state: this.order.state,
+                    zip: this.order.zip,
+                    phone: this.order.phone,
+                    gift: this.order.gift,
+                    method: this.order.method,
+                    cart: this.cart,
+                  }),
+                }
+              );
+
+              const data = await response.json();
+              if (response.ok) {
+                this.showPopup = true;
+                this.popupMessage = "Order placed successfully!";
+                this.cart = []; // Clear the cart after placing the order
+                this.cartitemcount = 0;
+                this.totalPrice = 0;
+              } else {
+                this.showPopup = true;
+                this.popupMessage = "Failed to place order: " + data.msg;
+              }
+            } catch (error) {
+              console.error("Error placing order:", error);
+              this.showPopup = true;
+              this.popupMessage = "Error placing order.";
+            } finally {
+              setTimeout(() => {
+                this.showPopup = false;
+                this.checkoutPage = false;
+              }, 3000);
+            }
+          },
+        },
+
+        created() {
+          // Fetch data when the component is created
+          this.fetchActivities();
+        },
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+[
+    {
+      "id": 101,
+      "title": "Dance Club",
+      "subject": "Dance",
+      "location": "Dubai",
+      "price": 100,
+      "image": "images5.jpeg",
+      "AvailableInventory": 10
+    },
+    {
+      "id": 102,
+      "title": "Chess Club",
+      "subject": "Chess",
+      "location": "Abu Dhabi",
+      "price": 155,
+      "image": "horse-chess-logo-4d3a344a-31cd-4b66-b938-a06db92f70b3.jpg",
+      "AvailableInventory": 23
+     
+    },
+    {
+      "id": 103,
+      "title": "Physical Education",
+      "subject": "Mental Health",
+      "location": "Sharjah",
+      "price": 130,
+      "image": "1489a60306a98752f4e0464d24a9e78f.jpg",
+      "AvailableInventory": 25
+      
+    },
+    {
+      "id": 104,
+      "title": "Drama & Film Club",
+      "subject": "Drama",
+      "location": "Al Ain",
+      "price": 80,
+      "image": "drama-masks.jpeg",
+      "AvailableInventory": 15
+     
+    },
+    {
+      "id": 105,
+      "title": "Music Club",
+      "subject": "Music",
+      "location": "Jebel Ali",
+      "price": 100,
+      "image": "png-clipart-roy-music-school-music-industry-ghaziabad-alas-colores-logo-monochrome.png",
+      "AvailableInventory": 25
+     
+    },
+    {
+      "id": 106,
+      "title": "Science Club",
+      "subject": "Science & Technology",
+      "location": "Dubai",
+      "price": 195,
+      "image": "82e7287b91acb66d6f024e07c98845b1.jpg",
+      "AvailableInventory": 25
+      
+    },
+    {
+      "id": 107,
+      "title": "Rugby Club",
+      "subject": "Sports",
+      "location": "Al Jaddaf",
+      "price": 130,
+      "image": "rugby-logo-with-title-rugby-rugby-ball_472355-392.avif",
+      "AvailableInventory": 18
+
+    },
+    {
+      "id": 108,
+      "title": "Art Club",
+      "subject": "Art",
+      "location": "Sharjah",
+      "price": 170,
+      "image": "creators-gonna-create-600nw-1153610236.webp",
+      "AvailableInventory": 10
+     
+    },
+    {
+      "id": 109,
+      "title": "Badminton Club",
+      "subject": "Sports",
+      "location": "Dubai",
+      "price": 150,
+      "image": "360_F_512245982_W6yxaY8ipq1yACVf02guW7RqLTFf6vAJ.jpg",
+      "AvailableInventory": 8
+      
+    },
+    {
+      "id": 110,
+      "title": "Padel Club",
+      "subject": "Sports",
+      "location": "Abu Dhabi",
+      "price": 120,
+      "image": "padel-club-rackets-tennis-ball-logo-badge-emblem-illustration-316045988.webp",
+      "AvailableInventory": 5
+      
+    }
+  ]
